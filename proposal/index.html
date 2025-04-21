@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumen: Global Illumination in Unreal Engine</title>
+    <!-- Include MathJax for equation rendering -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #3498db;
+        }
+        h2 {
+            margin-top: 30px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 20px auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .team-members {
+            background-color: #eaf2f8;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .equation {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .image-caption {
+            text-align: center;
+            font-style: italic;
+            margin-top: 10px;
+            color: #666;
+        }
+        .week {
+            margin-left: 20px;
+        }
+        .reference {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Lumen: Global Illumination in Unreal Engine</h1>
+    
+    <div class="team-members">
+        <h3>Team Members</h3>
+        <p>Jasper Liu, Zihan Liao, Junming Chen, Jinglun Zhang</p>
+    </div>
+    
+    <h2>Introduction</h2>
+    <blockquote>"Real-time global illumination has always been a holy grail of computer graphics."</blockquote>
+    <p>Lumen is a dynamic global illumination and reflections system implemented in Unreal Engine (UE) 5. Lumen Global Illumination solves diffuse indirect lighting. For example, light bouncing diffusely off a surface picks up the color of that surface and reflects the colored light onto other nearby surfaces, creating an effect called color bleed. Meshes in scenes also block indirect lighting, which also produces indirect shadowing.</p>
+    
+    <!-- image -->
+    <img src="fig1.png" alt="Lumen Global Illumination" />
+    <div class="image-caption">Figure 1: Example scene from Unreal official sites that demonstrates the rendering effect of Lumen</div>
+    
+    <p>The magic of Lumen is that it provides infinite diffuse bounces within a limited time. In this project, we aim to explore how Lumen realizes real-time global illumination and improve the rendering efficiency without compromising too many visual effects.</p>
+    
+    <p>In this final project, we aim to explore and implement the core and essential idea behind Lumen. Ignoring the complex engineering and framework limitations, we want to build a global illumination renderer that traces the ray to collect direct light, but uses a Radiosity-based method for accumulating indirect light as Lumen does. Our goal is to achieve amazing global illumination quality faster than our Path Tracing baselines running on CPU.</p>
+    
+    <h2>Problem Description</h2>
+    <h3>Solving the Discretized Rendering Equation</h3>
+    <p>In general, the difficulty of real-time global illumination lies in solving the rendering equation:</p>
+    
+    <div class="equation">
+        \[B(x) = B_e(x) + \rho(x) \cdot \int_{M} B(y) \cdot \frac{G(x \leftrightarrow y) \cdot V(x \leftrightarrow y)}{\pi} \mathrm{d}A_y\]
+        \[\underbrace{\frac{G(x \leftrightarrow y) \cdot V(x \leftrightarrow y)}{\pi}}_{G'(x \leftrightarrow y)}\]
+    </div>
+    
+    <p>By discretizing the equation and breaking the continuous surface into surface elements, we are able to reach the following linear equations:</p>
+    
+    <div class="equation">
+        \[B_i = B_{e,i} + \rho_i \sum_{j=1}^{n} F_{ij} B_j\]
+    </div>
+    
+    <p>where \(B_i\) represents the radiosity of the i-th surface element, \(B_{e,i}\) is the emission from the i-th surface element and the form factors is given by:</p>
+    
+    <div class="equation">
+        \[F_{ij} = \frac{1}{A_i} \int_{A_i} \int_{A_j} G'(x \leftrightarrow y) \, \mathrm{d}A_{y,j} \, \mathrm{d}A_{x,i}\]
+    </div>
+    
+    <p>Now the question is, how to efficiently solve the above linear equation. One way is to use Gaussian elimination, but the time complexity goes up in cubic order with respect to the number of surface elements.</p>
+    
+    <h3>Lumen's Approach</h3>
+    <p>Lumen incorporates two new idea: surface and radiance cache. They store \(B_i\) and the corresponding material information at t-th time step, and use them to update the Bs at t+1-th time step.</p>
+    <div class="equation">
+        \[B_i^{t+1} = B_{e,i} + \rho_i \sum_{j=1}^{N} B_j^t \cdot F_{ij}\]
+    </div>
+    <p>This method relies on one condition to converge quickly and accurately to the true global illumination solution: the radiosity of the i+1-th surface element at t-th time step does not differ significantly from itself at t-th time step. And this condition is generally true in scenarios where real-time rendering is needed.</p>
+    
+    <h3>Bottleneck and Our Goal</h3>
+    <p>To calculate \(B_i\) at t+1 time step, we need to know what surface element is able to contribute to \(B_i\). This still requires us to sample numerous outgoing radiance and perform raytracing. And we need to perform these operations for every surface element.</p>
+    
+    <p>Our goal is to preserve the real-time rendering efficiency while not compromising too much of the visual effect. Specifically, we aim to explore the dynamic combination of radiosity calculation using radiance cache and distance field in Lumen.</p>
+    
+    <h2>Goals and Deliverables</h2>
+    <ol>
+        <li><strong>What we plan to deliver:</strong> We hope to deliver a demo that demonstrates our global illumination algorithm using the ideas that are proposed in Lumen. For simplicity of the project, we will first only consider the rendering within a distance range of 0-2 m.</li>
+        <li><strong>What we hope to achieve if things go well and you get ahead of schedule:</strong> The current Lumen global illumination algorithm divides the area into three parts based on their distance to the camera and uses a) ray intersection b) distance field c) handle lighting from different distances. We hope that we can unify the above-mentioned methods by proposing a dynamically integrated voxel-distance field-radiance cache approach.</li>
+    </ol>
+    
+    <h2>Schedule</h2>
+    <div class="week"><strong>Week 1-2:</strong> Implementation of distance field and Ray matching.</div>
+    <div class="week"><strong>Week 3-4:</strong> Implementation of surface and radiance cache. Explore voxel lighting for the rendering of far-away objects, if possible.</div>
+    
+    <h2>Resources</h2>
+    <div class="reference">[1] Jaroslav Křivánek. Computer graphics III – Rendering equation and its solution</div>
+    <div class="reference">[2] UE5 Unreal Engine: <a href="https://github.com/EpicGames/UnrealEngine.git" target="_blank">https://github.com/EpicGames/UnrealEngine.git</a></div>
+</body>
+</html>
