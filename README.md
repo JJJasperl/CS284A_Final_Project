@@ -7,8 +7,8 @@ An educational real-time global illumination renderer inspired by techniques des
 [Final Report](https://jjjasperl.github.io/CS284A_Final_Project/final/) ·
 [Official Showcase](https://cs184.eecs.berkeley.edu/sp25/project/showcase/) ·
 [Course](https://cs184.eecs.berkeley.edu/sp25/) ·
-[Final Slides](https://docs.google.com/presentation/d/17Z62AyyZ5z2muIFhCoKLuutNucc0DL6-/edit) ·
-[Final Video](https://github.com/JJJasperl/CS284A_Final_Project/releases/download/sp25-final-assets/CS284A-Lumen-Final-Video.mp4)
+[Final Slides](https://docs.google.com/presentation/d/17Z62AyyZ5z2muIFhCoKLuutNucc0DL6-/edit?usp=sharing&ouid=118023706164270073581&rtpof=true&sd=true) ·
+[Final Video](https://drive.google.com/file/d/1HVseVAh-J4LDwcaLxMnNvZDmEjb_lxWA/view?usp=sharing)
 
 ![Lumen project rendering](final/fig/bunny_mirrorwall.png)
 
