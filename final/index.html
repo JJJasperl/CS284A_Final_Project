@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CS284A Final Project</title>
+    <meta name="description" content="Lumen-inspired real-time global illumination — CS 184/284A Spring 2025 Showcase Winner.">
+    <title>Lumen — CS 184/284A Spring 2025 Showcase Winner</title>
     <!-- Include MathJax for equation rendering -->
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
         body {
@@ -124,22 +124,68 @@
         .button:hover {
             background-color: #2c3e50;
         }
+        .award, .scope, .contribution {
+            padding: 16px 18px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .award {
+            background: #fff7d6;
+            border: 1px solid #e5c85d;
+            text-align: center;
+            font-weight: bold;
+        }
+        .scope, .contribution {
+            background: #eef6fc;
+            border-left: 4px solid #3498db;
+        }
+        .nav {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+        .nav a { color: #245b7f; }
+        .figure-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2%;
+        }
+        .figure-grid figure { width: 40%; }
+        @media (max-width: 640px) {
+            .button-row { flex-direction: column; }
+            .figure-grid figure { width: 100%; }
+        }
     </style>
 </head>
 <body>
-    <h1>Lumen: Global Illumination in Unreal Engine</h1>
+    <nav class="nav" aria-label="Project navigation">
+        <a href="../">Project Home</a>
+        <a href="https://cs184.eecs.berkeley.edu/sp25/">Course</a>
+        <a href="https://cs184.eecs.berkeley.edu/sp25/project/showcase/">Official Showcase</a>
+    </nav>
+    <h1>Lumen-Inspired Real-Time Global Illumination</h1>
+    <div class="award">&#127942; CS 184/284A Spring 2025 Showcase Winner — one of five winners selected from more than 60 team projects.</div>
     <div class="content">
         <p style="font-size: 1.5em; font-weight: bold;">Final report</p>
         <div class="button-row">
-            <a href="https://drive.google.com/file/d/1xnAhccl5PV072r464KN8cNmIqF1706g1/view?usp=sharing" target="_blank" class="button">Video</a>
-            <a href="https://docs.google.com/presentation/d/1ufrtLGJfFDINMAVb6WRvFgbwY6hgtv2Lsr-7qAYlbkc/edit?usp=drive_link" target="_blank" class="button">PPT</a>
+            <a href="https://github.com/JJJasperl/CS284A_Final_Project/releases/download/sp25-final-assets/CS284A-Lumen-Final-Video.mp4" target="_blank" rel="noopener noreferrer" class="button">Final Video</a>
+            <a href="https://docs.google.com/presentation/d/17Z62AyyZ5z2muIFhCoKLuutNucc0DL6-/edit" target="_blank" rel="noopener noreferrer" class="button">Final Slides</a>
         </div>
     </div>
     
     <div class="team-members">
-        <p>Jasper Liu, Zihan Liao, Junming Chen, Jinglun Zhang</p>
+        <p>Jasper Liu, Jinglun Zhang, Junming Chen, Zihan Liao</p>
         <h3>UC Berkeley</h3>
     </div>
+
+    <section class="scope">
+        <h2>Starting Point and Scope</h2>
+        <p>This educational renderer extends the UC Berkeley CS 184/284A Homework 3 path tracer. It explores techniques inspired by Unreal Engine 5's Lumen, but it is not Epic Games' production implementation, does not run inside Unreal Engine, and is not affiliated with Epic Games.</p>
+        <p>The public project repository contains this report, presentation links, video, and rendered results. Course-derived implementation source is preserved separately in a private archive.</p>
+    </section>
     
     
     <blockquote><strong><em>"Real-time global illumination has always been a holy grail of computer graphics."</em></strong></blockquote>
@@ -148,7 +194,7 @@
     
     <!-- image -->
     <img src="fig1.png" alt="Lumen Global Illumination" />
-    <div class="image-caption">Figure 1: Example scene from Unreal official sites that demonstrates the rendering effect of Lumen</div>
+    <div class="image-caption">Figure 1: Example scene demonstrating Lumen. Source: <a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/lumen-technical-details-in-unreal-engine">Epic Games, Lumen Technical Details</a>.</div>
 
     <h2>Introduction and Problem Description</h2>
 
@@ -222,34 +268,34 @@
     <p>The second engineering challenge is as follows:</p>
     
     <ul>
-        <li>Conventional ray-triangle intersection acceleration structures, such as bounding volume hierarchies (BVHs), are computationally expensive. According to Wright et al. [wright2022lumen], real-time performance using such structures is limited to approximately half a ray per pixel. Additionally, tree-based data structures like BVHs exhibit poor performance on GPUs due to their branch-heavy execution patterns.</li>
+        <li>Conventional ray-triangle intersection acceleration structures, such as bounding volume hierarchies (BVHs), are computationally expensive. According to Wright et al. <a href="#ref-3">[3]</a>, real-time performance using such structures is limited to approximately half a ray per pixel. Additionally, tree-based data structures like BVHs exhibit poor performance on GPUs due to their branch-heavy execution patterns.</li>
     </ul>
     
-    <p>To overcome this, Lumen avoids direct ray-triangle intersection and instead employs ray marching accelerated by signed distance fields (SDFs) [wright2022lumen], which are significantly more GPU-friendly [tomczak2012gpu].</p>
+    <p>To overcome this, Lumen avoids direct ray-triangle intersection and instead employs ray marching accelerated by signed distance fields (SDFs) <a href="#ref-3">[3]</a>, which are significantly more GPU-friendly <a href="#ref-2">[2]</a>.</p>
     
-    <p>We began by implementing a world-space SDF using a 3D texture that encapsulates the entire scene’s bounding box, with a resolution of \( 256 \times 256 \times 256 \). The SDF is computed and updated in real time using the Jump Flooding Algorithm (JFA) [rong2006jump]. The result of this initial implementation is illustrated in Fig. fig:stupid_sdf.</p>
+    <p>We began by implementing a world-space SDF using a 3D texture that encapsulates the entire scene’s bounding box, with a resolution of \( 256 \times 256 \times 256 \). The SDF is computed and updated in real time using the Jump Flooding Algorithm (JFA) <a href="#ref-1">[1]</a>. The result of this initial implementation is illustrated in Figure 2a.</p>
     
-    <p>However, this implementation exhibits several limitations. Achieving adequate geometric detail necessitates high-resolution SDFs, yet JFA only provides an approximation, which introduces imprecision at finer resolutions. As shown in Fig. fig:stupid_sdf, some voxels remain incorrectly updated, resulting in noticeable artifacts (e.g., white pixels indicating rays that fail to intersect geometry). Furthermore, the performance is suboptimal; rendering the hit point lengths at this resolution yields only ~25 FPS.</p>
+    <p>However, this implementation exhibits several limitations. Achieving adequate geometric detail necessitates high-resolution SDFs, yet JFA only provides an approximation, which introduces imprecision at finer resolutions. As shown in Figure 2a, some voxels remain incorrectly updated, resulting in noticeable artifacts (e.g., white pixels indicating rays that fail to intersect geometry). Furthermore, the performance is suboptimal; rendering the hit point lengths at this resolution yields only ~25 FPS.</p>
     
-    <figure style="text-align: center; display: flex; justify-content: center; gap: 2%;">
+    <div class="figure-grid">
       <figure style="width: 40%;" id="fig:stupid_sdf">
         <img src="fig/stupid_sdf.png" alt="World-space SDF" style="width: 100%;">
         <figcaption>(a) Our world-space SDF at resolution \(256 \times 256 \times 256\).</figcaption>
       </figure>
       <figure style="width: 40%;" id="fig:ue_sdf">
         <img src="fig/ue_sdf.png" alt="UE5 Mesh SDF" style="width: 100%;">
-        <figcaption>(b) UE5 Mesh SDF with resolution \(56 \times 49 \times 56\).</figcaption>
+        <figcaption>(b) UE5 Mesh SDF with resolution \(56 \times 49 \times 56\). Source: <a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/lumen-technical-details-in-unreal-engine">Epic Games</a>.</figcaption>
       </figure>
-    </figure>
+    </div>
     
     <figure style="text-align: center;" id="fig:revised_sdf">
         <img src="fig/revised_sdf.png" alt="Mesh-space SDF implementation" style="width: 40%;">
         <figcaption>Our mesh-space SDF implementation.</figcaption>
     </figure>
     
-    <p>Upon reviewing documentation and visuals from Unreal Engine 5, we identified Fig. fig:ue_sdf, which shows a mesh SDF implementation with a much lower resolution of \(56 \times 49 \times 56\). This observation led us to hypothesize that Lumen maintains a separate SDF for each mesh, computed in the object space and covering only the mesh’s bounding volume. During ray marching, the bounding box of the mesh is first intersected, and marching proceeds in object space to find the hit point on the mesh surface. This insight is consistent with Lumen’s use of the term <em>Mesh Distance Field</em>.</p>
+    <p>Upon reviewing documentation and visuals from Unreal Engine 5, we identified Figure 2b, which shows a mesh SDF implementation with a much lower resolution of \(56 \times 49 \times 56\). This observation led us to hypothesize that Lumen maintains a separate SDF for each mesh, computed in the object space and covering only the mesh’s bounding volume. During ray marching, the bounding box of the mesh is first intersected, and marching proceeds in object space to find the hit point on the mesh surface. This insight is consistent with Lumen’s use of the term <em>Mesh Distance Field</em>.</p>
     
-    <p>Based on this understanding, we implemented mesh-space SDFs. Each mesh maintains its own distance field within object space. This revision significantly improved both accuracy and performance, achieving approximately 160 FPS. The result is shown in figures above</p>
+    <p>Based on this understanding, we implemented mesh-space SDFs. Each mesh maintains its own distance field within object space. This revision significantly improved both accuracy and performance, achieving approximately 160 FPS. The result is shown in Figure 2c.</p>
 
     <h3>Surface and Radiance Caching Using Cards</h3>
 
@@ -263,18 +309,18 @@
     
     <figure style="text-align: center;" id="fig:ue_cards">
         <img src="fig/ue_cards.png" alt="UE5 surface cache structure using Cards" style="width: 40%;">
-        <figcaption>UE5 surface cache structure using "Cards"</figcaption>
+        <figcaption>UE5 surface cache structure using "Cards." Source: <a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/lumen-technical-details-in-unreal-engine">Epic Games</a>.</figcaption>
     </figure>
     
-    <p>Fig. fig:ue_cards, sourced from the official Unreal Engine documentation, reveals Lumen’s approach to mitigating this storage overhead. The key observation is that the axis-aligned bounding box of a mesh typically contains substantial regions of empty space that do not correspond to the actual surface and thus need not be cached.</p>
+    <p>Figure 3, sourced from the official Unreal Engine documentation, reveals Lumen’s approach to mitigating this storage overhead. The key observation is that the axis-aligned bounding box of a mesh typically contains substantial regions of empty space that do not correspond to the actual surface and thus need not be cached.</p>
     
     <p>To avoid caching this non-surface volume, Lumen introduces the concept of <strong>Cards</strong>. A card is a spatial cuboid that is discretized to store surface data. A given mesh is decomposed into multiple cards, each capturing a portion of its surface. This subdivision reduces the amount of unused space represented in the cache. However, it introduces an additional lookup cost—during ray intersection, one must identify the specific card containing the hit point to access the corresponding surface data. In the limiting case where a mesh uses a single card, the scheme degenerates into a full-object-space cache with resolution equal to that of the SDF. Thus, the number of cards offers a tunable tradeoff between memory efficiency and access performance.</p>
     
-    <p>To enable card-based caching, we implemented a mesh decomposition strategy using the K-Means clustering algorithm to partition the surface point cloud into a specified number of clusters (equal to the number of desired cards). For each cluster, we computed an oriented bounding box (OBB) using principal component analysis (PCA). The resulting card structure is visualized in Fig. fig:bunny_cards.</p>
+    <p>To enable card-based caching, we implemented a mesh decomposition strategy using the K-Means clustering algorithm to partition the surface point cloud into a specified number of clusters (equal to the number of desired cards). For each cluster, we computed an oriented bounding box (OBB) using principal component analysis (PCA). The resulting card structure is visualized in Figure 4a.</p>
     
-    <p>Following card generation, we implemented a surface cache. This cache stores the normal vectors and the material information corresponding to the discretized surface points within each card. It additionally records data from 16 radiance emissions originating from the hemisphere of the surface element. A visualization of the resulting normals is provided in Fig. fig:bunny_normal. The visualization frame rate is now about 80 fps.</p>
+    <p>Following card generation, we implemented a surface cache. This cache stores the normal vectors and the material information corresponding to the discretized surface points within each card. It additionally records data from 16 radiance emissions originating from the hemisphere of the surface element. A visualization of the resulting normals is provided in Figure 4b. The visualization frame rate is now about 80 FPS.</p>
     
-    <figure style="text-align: center; display: flex; justify-content: center; gap: 2%;">
+    <div class="figure-grid">
       <figure style="width: 40%;" id="fig:bunny_cards">
         <img src="fig/bunny_cards.png" alt="Card generation for CBbunny" style="width: 100%;">
         <figcaption>(a) Card generation for the CBbunny scene with a maximum of 12 cards.</figcaption>
@@ -283,9 +329,9 @@
         <img src="fig/bunny_normal.png" alt="Cached surface normals visualization" style="width: 100%;">
         <figcaption>(b) Visualization of cached surface normals.</figcaption>
       </figure>
-    </figure>
+    </div>
 
-    <h3>Updating the Radiance Cache Using radiosity equation</h3>
+    <h3>Updating the Radiance Cache Using the Radiosity Equation</h3>
 
     <p>We now proceed to the radiance cache update step, following the Lumen-style reuse formulation described in radiosity equation. Given the established data structure for the radiance cache, the update is performed as follows: for each surface element represented in the card-based surface cache, we emit 16 rays uniformly distributed over the hemisphere defined by the surface normal stored in the cache. For each ray, we determine its intersection point with the scene geometry and identify the surface element associated with the intersection.</p>
     
@@ -297,7 +343,7 @@
     </div>
     <p>where \(p(v_i)\) is the probability density of sampling direction \(v_i\). For diffuse surfaces, \( \text{BRDF}(u, v_i) = \frac{\text{reflectance}}{\pi} \) and \( p(v_i) = \frac{1}{2\pi} \). For ideal mirror surfaces, \( \text{BRDF}(u, v_i) = \text{reflectance} \) and \( p(v_i) = 16\delta(\text{reflect}(u, n) - v_i) \), where the Dirac delta \( \delta(x) \) is approximated as 1 when \(x\) is sufficiently small, accounting for discretization in the cache.</p>
     
-    <p>The radiance cache update algorithm is outlined in Algorithm alg:update_radiance_cache.</p>
+    <p>The radiance cache update algorithm is outlined in Algorithm 1.</p>
     
     <div class="algorithm" id="alg:update_radiance_cache">
       <strong>Algorithm 1:</strong> Radiance Cache Update (Lumen-style Reuse)
@@ -325,9 +371,9 @@
 
     <h4>Rendering via Radiance Cache Sampling</h4>
 
-    <p>Our initial strategy for rendering with the radiance cache is straightforward: for each camera pixel, we cast 16 rays from the screen space, estimate the radiance value \(r\) using the sample equation, and compute the final pixel color as the average of these 16 samples. In effect, the procedure mirrors the radiance cache update process described in Algorithm alg:update_radiance_cache, with the distinction that the updated surface element is now the camera pixel itself rather than a card-based surface element.</p>
+    <p>Our initial strategy for rendering with the radiance cache is straightforward: for each camera pixel, we cast 16 rays from the screen space, estimate the radiance value \(r\) using the sample equation, and compute the final pixel color as the average of these 16 samples. In effect, the procedure mirrors the radiance cache update process described in Algorithm 1, with the distinction that the updated surface element is now the camera pixel itself rather than a card-based surface element.</p>
 
-    <figure style="text-align: center; display: flex; justify-content: center; gap: 2%;">
+    <div class="figure-grid">
     <figure style="width: 40%;" id="fig:s16">
         <img src="fig/s16.png" alt="Direct radiance cache sampling" style="width: 100%;">
         <figcaption>(a) Rendering by directly sampling the radiance cache.</figcaption>
@@ -336,18 +382,18 @@
         <img src="fig/s64.png" alt="Super-sampled radiance cache rendering" style="width: 100%;">
         <figcaption>(b) Rendering with super-sampled, anti-aliased radiance cache (4× rate).</figcaption>
     </figure>
-    </figure>
+    </div>
 
-    <p>The result of this naive sampling approach is shown in Fig. fig:s16. The rendered image exhibits severe artifacts—most notably, large regions on the wall lack any illumination. This is attributed to the sparse sampling of the radiance cache, which fails to capture meaningful radiance contributions for certain viewing directions. Despite this issue, it is worth noting that Lumen [wright2022lumen] employs a similar cache resolution of only \(4 \times 4\) samples per surface element, consistent with our current configuration. A crucial problem arise here:</p>
+    <p>The result of this naive sampling approach is shown in Figure 5a. The rendered image exhibits severe artifacts—most notably, large regions on the wall lack any illumination. This is attributed to the sparse sampling of the radiance cache, which fails to capture meaningful radiance contributions for certain viewing directions. Despite this issue, it is worth noting that Lumen <a href="#ref-3">[3]</a> employs a similar cache resolution of only \(4 \times 4\) samples per surface element, consistent with our current configuration. A crucial problem arises here:</p>
     <ul>
         <li>While increasing the resolution of the radiance cache would improve image quality, it also entails greater memory consumption and higher update costs, which conflicts with our objective of real-time rendering.</li>
     </ul>
 
-    <p>An alternative remedy is to apply super-sampling during the radiance cache update phase: we compute multiple radiance values per surface element and average them before storing the result in the cache. As illustrated in Fig. fig:s64, this strategy substantially mitigates aliasing artifacts observed in Fig. fig:s16. Nevertheless, some aliasing remains visible, particularly on the walls, and the increased sampling rate imposes a significant rendering speed penalty, rendering this method unsuitable for real-time applications.</p>
+    <p>An alternative remedy is to apply super-sampling during the radiance cache update phase: we compute multiple radiance values per surface element and average them before storing the result in the cache. As illustrated in Figure 5b, this strategy substantially mitigates aliasing artifacts observed in Figure 5a. Nevertheless, some aliasing remains visible, particularly on the walls, and the increased sampling rate imposes a significant rendering speed penalty, rendering this method unsuitable for real-time applications.</p>
 
     <h4>Rendering by Sampling Radiance Cache for Distant Lighting</h4>
 
-    <p>To improve the use of the radiance cache, we revisit the formulation in Wright et al. [wright2022lumen], which models the solution to the rendering equation using a geometric series of light transport:</p>
+    <p>To improve the use of the radiance cache, we revisit the formulation in Wright et al. <a href="#ref-3">[3]</a>, which models the solution to the rendering equation using a geometric series of light transport:</p>
     <div style="text-align: center;" id="eq:gi_solution">
     <p>
         \( L = E + KE + K^2E + \cdots \approx R \)
@@ -361,7 +407,7 @@
         \( L \approx E + KE + K^2 R \)
     </p>
     </div>
-    <p>This formulation aligns with Lumen’s implementation, which uses the radiance cache primarily to account for indirect lighting contributions arising from distant bounces, thereby correcting the error from early truncation of the light transport path. The algorithm corresponds to this two bounce implementation is shown in Algorithm alg:radiance_estimation.</p>
+    <p>This formulation aligns with Lumen’s implementation, which uses the radiance cache primarily to account for indirect lighting contributions arising from distant bounces, thereby correcting the error from early truncation of the light transport path. The corresponding two-bounce algorithm is shown in Algorithm 2.</p>
 
     <div class="algorithm" id="alg:radiance_estimation">
     <strong>Algorithm 2:</strong> Radiance Estimation using Radiance Cache and Two-Bounce Tracing
@@ -388,11 +434,11 @@
     </ol>
     </div>
 
-    <p>And finally, we arrive at the results shown in Fig. fig:gallery. The CBbunny rendering has a frame rate of about 20fps. The CBlucy and the CBdragon have frame rate of about 10fps.</p>
+    <p>And finally, we arrive at the results shown in Figure 6. The CBbunny rendering has a frame rate of about 20 FPS. The CBlucy and the CBdragon have a frame rate of about 10 FPS.</p>
 
     <h2>Potential Future Work and Conclusion</h2>
 
-    <p>As shown in Fig. fig:gallery, the rendered result exhibits noticeable noise. This primarily stems from two factors: (1) insufficient rays per pixel, and (2) lack of filtering during radiance sampling. Increasing the number of rays would reduce noise but significantly raise computational cost. Lumen addresses this by employing screen-space radiance caches and importance sampling, updating only a subset of probes per frame. In contrast, our approach performs importance sampling only for direct lighting and updates the entire screen-space radiance cache at every step. Moreover, Lumen places probes—sampling points that emit rays, gather radiance, and write to the radiance cache—more sparsely and strategically, both in world space and on screen, thereby reducing the number of rays required.</p>
+    <p>As shown in Figure 6, the rendered result exhibits noticeable noise. This primarily stems from two factors: (1) insufficient rays per pixel, and (2) lack of filtering during radiance sampling. Increasing the number of rays would reduce noise but significantly raise computational cost. Lumen addresses this by employing screen-space radiance caches and importance sampling, updating only a subset of probes per frame. In contrast, our approach performs importance sampling only for direct lighting and updates the entire screen-space radiance cache at every step. Moreover, Lumen places probes—sampling points that emit rays, gather radiance, and write to the radiance cache—more sparsely and strategically, both in world space and on screen, thereby reducing the number of rays required.</p>
     
     <p>After finishing this project, we’re more impressed than ever by Lumen and UE5. Even after many hours of work, we’ve only explored a small part of what Lumen offers. In fact, UE5 has many other incredible systems, like Nanite for mesh management. These carefully designed approximations and engineering ideas make what once seemed impossible—real-time global illumination—actually work in games.</p>
     
@@ -435,9 +481,15 @@
       <figcaption style="width: 100%; text-align: center; margin-top: 1em;">Results gallery.</figcaption>
     </figure>
 
+    <section class="contribution">
+        <h2>Team Contributions</h2>
+        <p>Jasper Liu contributed throughout project ideation and technical discussions; co-authored the report and presentation slides; participated in experimental analysis and interpretation of performance and quality trade-offs; built and maintained the public project website; and presented the work during the final showcase.</p>
+        <p>Zihan Liao led the core renderer implementation. The project was developed collaboratively by the four-person team.</p>
+    </section>
+
     <h2>Resources</h2>
-    <div class="reference">[1] Guodong Rong and Tiow-Seng Tan. 2006. Jump flooding in GPU with applications to Voronoi diagram and distance transform. In Proceedings of the 2006 symposium on Interactive 3D graphics and games. 109–116.</div>
-    <div class="reference">[2] Lukasz Jaroslaw Tomczak. 2012. GPU ray marching of distance fields. Technical University of Denmark 8 (2012), 3.</div>
-    <div class="reference">[3] Daniel Wright, Krzysztof Narkowicz, and Patrick Kelly. 2022. Lumen: Real-time global illumination in unreal engine 5. ACM SIGGRAPH Advances in Real-Time Rendering in Games Course (2022).</div>
+    <div class="reference" id="ref-1">[1] Guodong Rong and Tiow-Seng Tan. 2006. Jump flooding in GPU with applications to Voronoi diagram and distance transform. In Proceedings of the 2006 symposium on Interactive 3D graphics and games. 109–116.</div>
+    <div class="reference" id="ref-2">[2] Lukasz Jaroslaw Tomczak. 2012. GPU ray marching of distance fields. Technical University of Denmark 8 (2012), 3.</div>
+    <div class="reference" id="ref-3">[3] Daniel Wright, Krzysztof Narkowicz, and Patrick Kelly. 2022. Lumen: Real-time global illumination in unreal engine 5. ACM SIGGRAPH Advances in Real-Time Rendering in Games Course (2022).</div>
 </body>
 </html>

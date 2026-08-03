@@ -1,108 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>CS184/284A Homework Webpages</title>
-		<!-- Include MathJax for equation rendering -->
-		<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-		<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-		<style>
-			/* Transferred styles from proposal/index.html */
-			body {
-				font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-				line-height: 1.6;
-				color: #333;
-				max-width: 1000px;
-				margin: 0 auto;
-				padding: 20px;
-				background-color: #f9f9f9;
-			}
-			h1, h2, h3 {
-				color: #2c3e50;
-			}
-			h1 {
-				text-align: center;
-				margin-bottom: 30px;
-				padding-bottom: 15px;
-				border-bottom: 2px solid #3498db;
-			}
-			h2 {
-				margin-top: 30px;
-				padding-bottom: 10px;
-				border-bottom: 1px solid #e0e0e0;
-			}
-			img {
-				max-width: 100%;
-				height: auto;
-				display: block;
-				margin: 20px auto;
-				border: 1px solid #ddd;
-				border-radius: 4px;
-				box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-			}
-			.team-members {
-				background-color: #eaf2f8;
-				padding: 15px;
-				border-radius: 5px;
-				text-align: center;
-				margin: 20px 0;
-			}
-			.equation {
-				text-align: center;
-				margin: 20px 0;
-			}
-			.image-caption {
-				text-align: center;
-				font-style: italic;
-				margin-top: 10px;
-				color: #666;
-			}
-			.week {
-				margin-left: 20px;
-			}
-			.reference {
-				margin-left: 20px;
-				margin-bottom: 10px;
-				color: #666;
-			}
-			.author {
-				text-align: center;
-				margin-top: 20px;
-				font-size: 0.9em;
-				color: #555;
-			}
-		</style>
-	</head>
-	<body>
-		<div class="wrapper">
-			<header>
-				<h1 style="align-self:flex-end;">Lumen: Global Illumination in Unreal Engine</h1>
-				<div class="team-members">
-					<p>Jasper Liu, Zihan Liao, Junming Chen, Jinglun Zhang</p>
-					<h3>UC Berkeley</h3>
-				</div>
-			</header>
-			<main>
-				<div class="content">
-					<ul>
-						<li><a href="/proposal/index.html">Proposal</a></li>
-						<li><a href="/milestone/index.html">Milestone</a></li>
-						<li><a href="/final/index.html">Final</a></li>
-					</ul>
-				</div>
-			</main>
-		</div>
-	</body>
-	<script>
-		var links = document.body.getElementsByTagName("a")
-		var a = window.location.href.indexOf(".io")
-		var repo_name = window.location.href.substring(a+3)
-		for(var i = 0; i < links.length; i++){
-			var link = links[i]
-			var actual_name = link.href.substring(link.href.indexOf(".io")+4)
-			link.href = repo_name + actual_name
-		}
-	</script>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Lumen-inspired real-time global illumination — UC Berkeley CS 184/284A Spring 2025 Showcase Winner.">
+  <meta property="og:title" content="Lumen-Inspired Real-Time Global Illumination">
+  <meta property="og:description" content="CS 184/284A Spring 2025 Showcase Winner">
+  <meta property="og:image" content="final/fig/bunny_mirrorwall.png">
+  <title>Lumen — CS 184/284A Spring 2025 Showcase Winner</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17202a;
+      --muted: #52606d;
+      --accent: #1769aa;
+      --accent-dark: #0f4f82;
+      --surface: #ffffff;
+      --award: #fff7d6;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #f4f7fa;
+      font-family: Inter, "Segoe UI", system-ui, sans-serif;
+      line-height: 1.6;
+    }
+    main {
+      width: min(960px, calc(100% - 32px));
+      margin: 40px auto;
+      padding: clamp(24px, 5vw, 56px);
+      background: var(--surface);
+      border-radius: 18px;
+      box-shadow: 0 18px 55px rgba(23, 32, 42, 0.12);
+    }
+    h1 {
+      max-width: 760px;
+      margin: 0 auto 8px;
+      text-align: center;
+      font-size: clamp(2rem, 6vw, 4rem);
+      line-height: 1.08;
+    }
+    .subtitle, .team { text-align: center; color: var(--muted); }
+    .award {
+      margin: 28px 0;
+      padding: 16px 20px;
+      border: 1px solid #e5c85d;
+      border-radius: 12px;
+      background: var(--award);
+      text-align: center;
+      font-weight: 600;
+    }
+    .hero {
+      width: 100%;
+      margin: 28px 0;
+      border-radius: 14px;
+      box-shadow: 0 12px 32px rgba(23, 32, 42, 0.15);
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin: 28px 0;
+    }
+    .actions a {
+      padding: 11px 18px;
+      border-radius: 999px;
+      color: #fff;
+      background: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .actions a:hover, .actions a:focus-visible { background: var(--accent-dark); }
+    .summary { max-width: 760px; margin: 24px auto 0; }
+    a { color: var(--accent-dark); }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Lumen-Inspired Real-Time Global Illumination</h1>
+    <p class="subtitle">UC Berkeley CS 184/284A · Spring 2025</p>
+    <p class="team">Jasper Liu, Jinglun Zhang, Junming Chen, and Zihan Liao</p>
+
+    <p class="award">
+      &#127942; One of five Showcase Winners selected from more than 60 team projects.
+      <a href="https://cs184.eecs.berkeley.edu/sp25/project/showcase/">View the official showcase</a>.
+    </p>
+
+    <img class="hero" src="final/fig/bunny_mirrorwall.png" alt="Bunny scene with global illumination and a mirror wall">
+
+    <div class="actions">
+      <a href="proposal/">Proposal</a>
+      <a href="milestone/">Milestone</a>
+      <a href="final/">Final Report</a>
+      <a href="https://docs.google.com/presentation/d/17Z62AyyZ5z2muIFhCoKLuutNucc0DL6-/edit">Final Slides</a>
+      <a href="https://github.com/JJJasperl/CS284A_Final_Project/releases/download/sp25-final-assets/CS284A-Lumen-Final-Video.mp4">Final Video</a>
+    </div>
+
+    <div class="summary">
+      <h2>About the project</h2>
+      <p>
+        This educational renderer explores signed distance fields, card-based surface caches,
+        radiance caching, and limited-bounce tracing to approximate global illumination at
+        interactive frame rates. It extends the CS 184/284A Homework 3 path tracer and is
+        inspired by ideas behind Unreal Engine 5's Lumen; it is not Epic Games' production
+        implementation and does not run inside Unreal Engine.
+      </p>
+      <p>
+        The public repository contains reports, presentation links, video, and rendered results.
+        Course-derived source code is preserved separately in a private archive.
+      </p>
+    </div>
+  </main>
+</body>
 </html>
